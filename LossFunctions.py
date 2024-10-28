@@ -2,6 +2,12 @@ import numpy as np
 import torch
 import math
 import os
+import sys
+current_dir  = os.getcwd()
+
+resource_path = os.path.join(current_dir, 'Face_Recognition_Resource')
+sys.path.append(resource_path)
+
 from Face_Recognition_Resource.evalutation import calculate_similarity
 from Face_Recognition_Resource.utils import accuracy_FR
 
