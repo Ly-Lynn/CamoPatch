@@ -1,0 +1,3 @@
+[submodule "Face_Recognition_Resource"]
+	path = Face_Recognition_Resource
+	url = https://github.com/khoa16122004/Face-Recognition-Resource

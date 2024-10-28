@@ -5,3 +5,4 @@ class Sample:
         img2 = Image.open(img2_path)
         self.img1 = transforms(Image.open(img1_path))
         self.img2 = transforms(Image.open(img1_path))
+        
