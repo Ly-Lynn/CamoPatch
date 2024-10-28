@@ -2,8 +2,8 @@ import numpy as np
 import torch
 import math
 import os
-from .Face_Recognition_Resource.evalutation import calculate_similarity
-from .Face_Recognition_Resource.utils import accuracy_FR
+from Face_Recognition_Resource.evalutation import calculate_similarity
+from Face_Recognition_Resource.utils import accuracy_FR
 
 def pytorch_switch(tensor_image):
     return tensor_image.permute(1, 2, 0)
