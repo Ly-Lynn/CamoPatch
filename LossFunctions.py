@@ -1,7 +1,9 @@
 import numpy as np
 import torch
 import math
-
+import os
+from .Face_Recognition_Resource.evalutation import calculate_similarity
+from .Face_Recognition_Resource.utils import accuracy_FR
 
 def pytorch_switch(tensor_image):
     return tensor_image.permute(1, 2, 0)
@@ -115,3 +117,46 @@ class Targeted:
 
         f_other = math.log(sum(math.exp(pi) for pi in preds))
         return [is_adversarial, f_other - f_target]
+
+class FaceVerification:
+    def __init__(self, 
+                 model, 
+                 true,
+                 unormalize=False):
+        self.model = model
+        self.true = true
+        self.unormalize = unormalize
+
+    def get_pred (self, img1, img2):
+        if self.unormalize:
+            img1_ = img1 * 255.
+
+        else:
+            img1_ = img1
+
+        img1_ = to_pytorch(img1_)
+        img1_ = img1_[None, :]
+        img2_ = to_pytorch(img2)
+        img2_ = img2_[None, :]
+        
+        preds1 = self.model(img1_)
+        preds2 = self.model(img2_)
+        sims = calculate_similarity(preds1, preds2)
+        y = accuracy_FR(sims, self.true)
+    
+        return y, sims, 1-sims
+
+    def __call__(self, img1, img2):
+        y, sims, not_sims = self.get_pred(img1, img2)
+        is_adversarial = True if y != self.true else False
+        # label la 0 => not_sims > sims
+        # label la 1 => sims > not_sims
+        if self.true == 1:
+            f_true = sims
+            f_other = not_sims
+        else:
+            f_true = not_sims
+            f_other = sims
+
+        return [is_adversarial, float(f_true - f_other)]
+

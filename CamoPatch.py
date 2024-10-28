@@ -86,84 +86,77 @@ def mutate(soln, mut):
 
 
 class Attack:
-    def __init__(self, params):
+    def __init__(self, params, type_attack="imagenet"):
         self.params = params
+        self.type_attack = type_attack
         self.process = []
 
     def completion_procedure(self, adversarial, x_adv, queries, loc, patch, loss_function):
         data = {
-            "orig": self.params["x"],
+            "orig": self.params["x"] if self.type_attack == "imagenet" else self.params["x1"],
+            "second": self.params["x2"] if self.type_attack == "face" else None,
             "adversary": x_adv,
             "adversarial": adversarial,
             "queries": queries,
             "loc": loc,
             "patch": patch,
             "patch_width": int(math.ceil(self.params["eps"] ** .5)),
-            "final_prediction": loss_function.get_label(x_adv),
+            "final_prediction": loss_function.get_label(x_adv) if self.type_attack == "imagenet" else loss_function.get_pred(x_adv, self.params["x2"])[0],
             "process": self.process
         }
 
         np.save(self.params["save_directory"], data, allow_pickle=True)
 
     def optimise(self, loss_function):
-        # initialize
-        x = self.params["x"] # ảnh input
-        c, h, w = self.params["c"], self.params["h"], self.params["w"] # channel, height, width
-        eps = self.params["eps"] # độ sparity 
-        s = int(math.ceil(eps ** .5)) # patch size length: s = sqrt(eps)
+        # Initialize
+        x = self.params["x"] if self.type_attack == "imagenet" else self.params["x1"]
+        x2 = self.params.get("x2", None)  # Only relevant if type_attack is "face"
+        c, h, w = self.params["c"], self.params["h"], self.params["w"]
+        eps = self.params["eps"]
+        s = int(math.ceil(eps ** .5))
 
-        """
-        N: số lượng vòng tròn có trong patch
-        patch_geno = (100, 7) giá trị 0->1
-        row[0]: y-coordinate 
-        row[1]: x-coordinate 
-        row[2]: radius 
-        row[3], row[4], row[5]: RGB color values
-        row[6]: alpha 
-        """
-        patch_geno = np.random.rand(self.params["N"], 7)    
+        patch_geno = np.random.rand(self.params["N"], 7)
         patch = render(patch_geno, s)
         loc = np.random.randint(h - s, size=2)
         
-        # li trong paper - hyper params điều chỉnh sự cân bằng giữa việc tối ưu hóa patch và vị trí của patch
-        # -> ta sẽ update vị trí mới của patch sau 1 số iteration (patch counter) nhất định
         update_loc_period = self.params["update_loc_period"]
 
         x_adv = x.copy()
-
-        # attach patch lên ảnh gốc x -> ảnh bị tấn công adv_x
         x_adv[loc[0]: loc[0] + s, loc[1]: loc[1] + s, :] = patch
         x_adv = np.clip(x_adv, 0., 1.)
 
-        # tính loss của adv_x
-        adversarial, loss = loss_function(x_adv)
+        # Calculate initial loss and adversarial status
+        if self.type_attack == "imagenet":
+            adversarial, loss = loss_function(x_adv)
+        else:
+            adversarial, loss = loss_function(x_adv, x2)
 
-        # Tính L2 giữa patch với nhau only
         l2_curr = l2(adv_patch=patch, orig_patch=x[loc[0]: loc[0] + s, loc[1]: loc[1] + s, :].copy())
 
-        patch_counter = 0 # iteration / số lượng patch đã tấn công
-        n_queries = self.params["n_queries"] # max_iteration
+        patch_counter = 0
+        n_queries = self.params["n_queries"]
         for it in tqdm(range(1, n_queries)):
             patch_counter += 1
-            # if số lượng patch đã tấn công < li => giữ nguyên location, chỉ atk patch
-            if patch_counter < update_loc_period: 
-                # đột biến patch mới từ patch trước đó
+
+            if patch_counter < update_loc_period:
                 patch_new_geno = mutate(patch_geno, self.params["mut"])
                 patch_new = render(patch_new_geno, s)
 
-                # attach patch vào ảnh
                 x_adv_new = x.copy()
                 x_adv_new[loc[0]: loc[0] + s, loc[1]: loc[1] + s, :] = patch_new
                 x_adv_new = np.clip(x_adv_new, 0., 1.)
 
-                # evaluation new thế hệ
-                adversarial_new, loss_new = loss_function(x_adv_new)
+                # Calculate new adversarial and loss values
+                if self.type_attack == "imagenet":
+                    adversarial_new, loss_new = loss_function(x_adv_new)
+                else:
+                    adversarial_new, loss_new = loss_function(x_adv_new, x2)
+
                 orig_patch = x[loc[0]: loc[0] + s, loc[1]: loc[1] + s, :].copy()
                 l2_new = l2(adv_patch=patch_new, orig_patch=orig_patch)
-                
-                # Nếu patch old đã bị tấn công thành công và patch new cũng bị tấn công thành công
-                # => chỉ nhận kết quả nếu như l2 new bé hơn l2 old => patch mới khó nhìn/tốt hơn patch cũ
-                if adversarial == True and adversarial_new == True:
+
+                # Update patch based on adversarial status and l2 criterion
+                if adversarial and adversarial_new:
                     if l2_new < l2_curr:
                         loss = loss_new
                         adversarial = adversarial_new
@@ -171,20 +164,17 @@ class Attack:
                         patch_geno = patch_new_geno
                         x_adv = x_adv_new
                         l2_curr = l2_new
-
-                else: #còn lại => chỉ update loss mới
-                    if loss_new < loss: # minimization
+                else:
+                    if loss_new < loss:
                         loss = loss_new
                         adversarial = adversarial_new
                         patch = patch_new
                         patch_geno = patch_new_geno
                         x_adv = x_adv_new
                         l2_curr = l2_new
-            # số lượng patch/iteration đã lớn hơn li =>  reset counter và update location (không đột biến patch mới)
             else:
+                # Reset patch counter and update location
                 patch_counter = 0
-
-                # location update dựa vào tổng số iteration và iter hiện tại
                 sh_i = int(max(sh_selection(n_queries, it) * h, 0))
                 loc_new = loc.copy()
                 loc_new = update_location(loc_new, sh_i, h, s)
@@ -192,29 +182,28 @@ class Attack:
                 x_adv_new[loc_new[0]: loc_new[0] + s, loc_new[1]: loc_new[1] + s, :] = patch
                 x_adv_new = np.clip(x_adv_new, 0., 1.)
 
-                # evaluate new solution
-                adversarial_new, loss_new = loss_function(x_adv_new)
+                # Calculate new adversarial and loss values with updated location
+                if self.type_attack == "imagenet":
+                    adversarial_new, loss_new = loss_function(x_adv_new)
+                else:
+                    adversarial_new, loss_new = loss_function(x_adv_new, x2)
 
                 orig_patch_new = x[loc_new[0]: loc_new[0] + s, loc_new[1]: loc_new[1] + s, :].copy()
                 l2_new = l2(adv_patch=patch, orig_patch=orig_patch_new)
 
-                # tương tự trên: nếu cả 2 ảnh trước và sau đều tấn công thành công thì update dựa trên l2
-                if adversarial == True and adversarial_new == True:
+                if adversarial and adversarial_new:
                     if l2_new < l2_curr:
                         loss = loss_new
                         adversarial = adversarial_new
                         loc = loc_new
-
                         x_adv = x_adv_new
                         l2_curr = l2_new
-                # còn lại, áp dụng simulated annealing để tối ưu hóa loca
                 else:
                     diff = loss_new - loss
-                    curr_temp = self.params["temp"] / (it +1)
-                    metropolis = math.exp(-diff/curr_temp)
+                    curr_temp = self.params["temp"] / (it + 1)
+                    metropolis = math.exp(-diff / curr_temp)
 
-                    if loss_new < loss or np.random.rand() < metropolis: 
-                         # minimization # first check
+                    if loss_new < loss or np.random.rand() < metropolis:
                         loss = loss_new
                         adversarial = adversarial_new
                         loc = loc_new
@@ -224,4 +213,5 @@ class Attack:
             self.process.append([loc, patch_geno])
 
         self.completion_procedure(adversarial, x_adv, it, loc, patch, loss_function)
+
         return
