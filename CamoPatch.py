@@ -230,7 +230,7 @@ class Attack:
                         loc = loc_new
                         x_adv = x_adv_new
                         l2_curr = l2_new
-
+            print(f"Adversarial: {adversarial}, Loss: {loss}, L2: {l2_curr}")
             self.process.append([loc, patch_geno, l2_curr, loss])
             saved_it = it
 
