@@ -48,7 +48,7 @@ if __name__ == "__main__":
         img2_dir = args.image2_dir
         x_test1 = load_image(Image.open(img1_dir))
         x_test2 = load_image(Image.open(img2_dir))
-        loss_func = FaceVerification(model, args.true_label, to_pytorch=True)
+        loss_func = FaceVerification(model, args.true_label)
         x1 = pytorch_switch(x_test1).detach().numpy()
         x2 = pytorch_switch(x_test2).detach().numpy()
         params = {
