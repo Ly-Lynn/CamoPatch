@@ -148,7 +148,7 @@ class FaceVerification:
         preds1 = self.model(img1_.to('cuda'))
         preds2 = self.model(img2_.to('cuda'))
         sims = calculate_similarity(preds1, preds2)
-        y = get_predict(sims, [self.true])
+        y = get_predict(sims)
     
         return y, sims, 1-sims
 
