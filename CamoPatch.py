@@ -91,6 +91,16 @@ class Attack:
         self.type_attack = type_attack
         self.process = []
 
+    def convert_to_serializable(self, data):
+        """Chuyển đổi các thành phần không tương thích với JSON."""
+        if isinstance(data, dict):
+            return {key: self.convert_to_serializable(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.convert_to_serializable(item) for item in data]
+        elif isinstance(data, np.ndarray):
+            return data.tolist()  
+        else:
+            return data 
     def completion_procedure(self, adversarial, x_adv, queries, loc, patch, loss_function):
         data = {
             "orig": self.params["x"] if self.type_attack == "imagenet" else self.params["x1"],
@@ -107,11 +117,18 @@ class Attack:
         # print(self.params["save_directory"])
         save_path = self.params["save_directory"]
         save_path = save_path.rsplit('.npy', 1)[0]
+        serializable_data = self.convert_to_serializable(data)
         with open(f"{save_path}res.json", 'w') as json_file:
-            json.dump(data, json_file, indent=4)
-        print(f"Result saved to {save_path}")
-        np.save(self.params["save_directory"], data, allow_pickle=True)
-
+            json.dump(serializable_data, json_file, indent=4)
+        print(f"Result json saved to {save_path}")
+        # np.save(self.params["save_directory"], data, allow_pickle=True)
+        
+        compatible_data = {
+            key: np.array(value) if isinstance(value, (list, tuple)) else value
+            for key, value in data.items() if isinstance(value, (np.ndarray, list, tuple))
+        }
+        np.save(self.params["save_directory"], compatible_data, allow_pickle=True)
+    
     def optimise(self, loss_function):
         # Initialize
         x = self.params["x"] if self.type_attack == "imagenet" else self.params["x1"]
