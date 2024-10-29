@@ -156,6 +156,7 @@ class FaceVerification:
         y, sims, not_sims = self.get_pred(img1, img2)
         print(y , sims, not_sims)
         is_adversarial = True if y != self.true else False
+        print(is_adversarial)
         # label la 1 => not_sims > sims
         # label la 0 => sims > not_sims
         if self.true == 0:
