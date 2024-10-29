@@ -231,7 +231,7 @@ class Attack:
                         x_adv = x_adv_new
                         l2_curr = l2_new
 
-            self.process.append([loc, patch_geno])
+            self.process.append([loc, patch_geno, l2_curr, loss])
             saved_it = it
 
         self.completion_procedure(adversarial, x_adv, saved_it, loc, patch, loss_function)
