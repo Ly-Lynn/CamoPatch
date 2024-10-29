@@ -132,7 +132,7 @@ class Attack:
             adversarial, loss = loss_function(x_adv, x2)
 
         l2_curr = l2(adv_patch=patch, orig_patch=x[loc[0]: loc[0] + s, loc[1]: loc[1] + s, :].copy())
-
+        saved_it = 0
         patch_counter = 0
         n_queries = self.params["n_queries"]
         for it in tqdm(range(1, n_queries)):
@@ -211,7 +211,8 @@ class Attack:
                         l2_curr = l2_new
 
             self.process.append([loc, patch_geno])
+            saved_it = it
 
-        self.completion_procedure(adversarial, x_adv, it, loc, patch, loss_function)
+        self.completion_procedure(adversarial, x_adv, saved_it, loc, patch, loss_function)
 
         return
