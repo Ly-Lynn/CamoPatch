@@ -145,8 +145,8 @@ class FaceVerification:
         img2_ = to_pytorch(img2)
         img2_ = img2_[None, :]
         
-        preds1 = self.model(img1_)
-        preds2 = self.model(img2_)
+        preds1 = self.model(img1_.to('cuda'))
+        preds2 = self.model(img2_.to('cuda'))
         sims = calculate_similarity(preds1, preds2)
         y = accuracy_FR(sims, self.true)
     
