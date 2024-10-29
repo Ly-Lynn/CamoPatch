@@ -106,8 +106,8 @@ class Attack:
         }
         # print(self.params["save_directory"])
         save_path = self.params["save_directory"]
-        save_path = os.path.splitext(save_path)[0] 
-        with open(f"{save_path}/res.json", 'w') as json_file:
+        save_path = save_path.rsplit('.npy', 1)[0]
+        with open(f"{save_path}res.json", 'w') as json_file:
             json.dump(data, json_file, indent=4)
         print(f"Result saved to {save_path}")
         np.save(self.params["save_directory"], data, allow_pickle=True)
