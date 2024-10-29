@@ -155,9 +155,9 @@ class FaceVerification:
     def __call__(self, img1, img2):
         y, sims, not_sims = self.get_pred(img1, img2)
         is_adversarial = True if y != self.true else False
-        # label la 0 => not_sims > sims
-        # label la 1 => sims > not_sims
-        if self.true == 1:
+        # label la 1 => not_sims > sims
+        # label la 0 => sims > not_sims
+        if self.true == 0:
             f_true = sims
             f_other = not_sims
         else:

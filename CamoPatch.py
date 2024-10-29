@@ -92,7 +92,6 @@ class Attack:
         self.process = []
 
     def convert_to_serializable(self, data):
-        """Chuyển đổi các thành phần không tương thích với JSON."""
         if isinstance(data, dict):
             return {key: self.convert_to_serializable(value) for key, value in data.items()}
         elif isinstance(data, list):
