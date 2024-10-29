@@ -9,7 +9,7 @@ resource_path = os.path.join(current_dir, 'Face_Recognition_Resource')
 sys.path.append(resource_path)
 
 from Face_Recognition_Resource.evalutation import calculate_similarity
-from Face_Recognition_Resource.utils import accuracy_FR
+from Face_Recognition_Resource.utils import get_predict
 
 def pytorch_switch(tensor_image):
     return tensor_image.permute(1, 2, 0)
@@ -148,15 +148,13 @@ class FaceVerification:
         preds1 = self.model(img1_.to('cuda'))
         preds2 = self.model(img2_.to('cuda'))
         sims = calculate_similarity(preds1, preds2)
-        y = accuracy_FR(sims, [self.true])
+        y = get_predict(sims, [self.true])
     
         return y, sims, 1-sims
 
     def __call__(self, img1, img2):
         y, sims, not_sims = self.get_pred(img1, img2)
-        print(y , sims, not_sims)
         is_adversarial = True if y != self.true else False
-        print(is_adversarial)
         # label la 1 => not_sims > sims
         # label la 0 => sims > not_sims
         if self.true == 0:
