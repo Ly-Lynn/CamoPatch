@@ -104,8 +104,9 @@ class Attack:
             "final_prediction": loss_function.get_label(x_adv) if self.type_attack == "imagenet" else loss_function.get_pred(x_adv, self.params["x2"])[0],
             "process": self.process
         }
-        print(self.params["save_directory"])
+        # print(self.params["save_directory"])
         save_path = self.params["save_directory"]
+        save_path = os.path.splitext(save_path)[0] 
         with open(f"{save_path}/res.json", 'w') as json_file:
             json.dump(data, json_file, indent=4)
         print(f"Result saved to {save_path}")
