@@ -122,11 +122,11 @@ class Attack:
         print(f"Result json saved to {save_path}")
         # np.save(self.params["save_directory"], data, allow_pickle=True)
         
-        compatible_data = {
-            key: np.array(value) if isinstance(value, (list, tuple)) else value
-            for key, value in data.items() if isinstance(value, (np.ndarray, list, tuple))
-        }
-        np.save(self.params["save_directory"], compatible_data, allow_pickle=True)
+        # compatible_data = {
+        #     key: np.array(value) if isinstance(value, (list, tuple)) else value
+        #     for key, value in data.items() if isinstance(value, (np.ndarray, list, tuple))
+        # }
+        # np.save(self.params["save_directory"], compatible_data, allow_pickle=True)
     
     def optimise(self, loss_function):
         # Initialize
