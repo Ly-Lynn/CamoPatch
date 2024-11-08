@@ -67,7 +67,7 @@ def mutate(soln, mut):
     change = np.random.randint(0, length + 1) # mutate số lượng ngẫu nhiên feature
 
     if np.random.rand() < (1 / mut): #????? sao change lớn hơn = length +1 được
-        change -= 1
+        change -= max(change - 1, 1)
         i, j = y, np.random.randint(0, genes)
         i, j, s = (i, j, -1) if i < j else (j, i, 1)
         new_specie[i: j + 1] = np.roll(new_specie[i: j + 1], shift=s, axis=0)
