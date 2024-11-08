@@ -94,11 +94,12 @@ class Attack:
         self.type_attack = type_attack
         self.process = []
 
-    def save_image (np_img, output_dir):
+    def save_image (self, np_img, output_dir):
         np_img = (np_img * 255).astype(np.uint8)
         img = Image.fromarray(np_img, mode='RGB')
         os.makedirs(os.path.dirname(output_dir), exist_ok=True)
         img.save(output_dir)
+    
     def convert_to_serializable(self, data):
         if isinstance(data, dict):
             return {key: self.convert_to_serializable(value) for key, value in data.items()}
