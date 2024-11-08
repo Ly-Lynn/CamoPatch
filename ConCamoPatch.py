@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     else:
         model = ImageNetModel(args.model)
-        image_dir = args.image_dir
+        image_dir = args.image1_dir
         x_test = load_image(Image.open(image_dir))
 
         loss = UnTargeted(model, args.true_label, to_pytorch=True)

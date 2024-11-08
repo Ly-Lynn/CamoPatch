@@ -5,6 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import json
+import pickle
 
 def l2(adv_patch, orig_patch):
     assert adv_patch.shape == orig_patch.shape
@@ -100,6 +101,7 @@ class Attack:
             return data.tolist()  
         else:
             return data 
+
     def completion_procedure(self, adversarial, x_adv, queries, loc, patch, loss_function):
         data = {
             "orig": self.params["x"] if self.type_attack == "imagenet" else self.params["x1"],
@@ -113,20 +115,19 @@ class Attack:
             "final_prediction": loss_function.get_label(x_adv) if self.type_attack == "imagenet" else loss_function.get_pred(x_adv, self.params["x2"])[0],
             "process": self.process
         }
-        # print(self.params["save_directory"])
+
         save_path = self.params["save_directory"]
         save_path = save_path.rsplit('.npy', 1)[0]
+
+        # Convert data to a serializable format if needed
         serializable_data = self.convert_to_serializable(data)
-        with open(f"{save_path}res.json", 'w') as json_file:
-            json.dump(serializable_data, json_file, indent=4)
-        print(f"Result json saved to {save_path}")
-        # np.save(self.params["save_directory"], data, allow_pickle=True)
+
+        # Save data in pickle format
+        with open(f"{save_path}{adversarial}.pkl", 'wb') as pickle_file:
+            pickle.dump(serializable_data, pickle_file)
         
-        # compatible_data = {
-        #     key: np.array(value) if isinstance(value, (list, tuple)) else value
-        #     for key, value in data.items() if isinstance(value, (np.ndarray, list, tuple))
-        # }
-        # np.save(self.params["save_directory"], compatible_data, allow_pickle=True)
+        print(f"Result pickle saved to {save_path}")
+
     
     def optimise(self, loss_function):
         # Initialize
