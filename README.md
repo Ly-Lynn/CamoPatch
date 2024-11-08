@@ -5,7 +5,7 @@
 1. Clone this repo
 
 ```bash
-!git clone --recurse-submodules https://Ly-Lynn:$github_token@github.com/Ly-Lynn/CamoPatch.git
+git clone --recurse-submodules https://Ly-Lynn:$github_token@github.com/Ly-Lynn/CamoPatch.git
 ```
 
 2. Create folder contains the pretrained models, and move the pretrained models to this folder

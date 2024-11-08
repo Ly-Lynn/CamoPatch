@@ -65,7 +65,7 @@ def mutate(soln, mut):
     y = np.random.randint(0, genes) # chọn random 1 circle để mutate
     change = np.random.randint(0, length + 1) # mutate số lượng ngẫu nhiên feature
 
-    if change >= length + 1: #????? sao change lớn hơn = length +1 được
+    if np.random.rand() < (1 / mut): #????? sao change lớn hơn = length +1 được
         change -= 1
         i, j = y, np.random.randint(0, genes)
         i, j, s = (i, j, -1) if i < j else (j, i, 1)
