@@ -72,7 +72,8 @@ def mutate(soln, mut):
         i, j, s = (i, j, -1) if i < j else (j, i, 1)
         new_specie[i: j + 1] = np.roll(new_specie[i: j + 1], shift=s, axis=0)
         y = j
-
+    
+    change = max(change, 1)
     # chọn random change để mutate
     selection = np.random.choice(length, size=change, replace=False)
 
