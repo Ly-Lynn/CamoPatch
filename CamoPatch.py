@@ -135,6 +135,8 @@ class Attack:
             pickle.dump(serializable_data, pickle_file)
         
         print(f"Result pickle saved to {save_path}")
+        self.save_image(np.array(data['orig']), f"{save_path}orig.png")
+
         self.save_image(np.array(data['adversary']), f"{save_path}{adversarial}.png")
         print(f"Result adversary saved to {save_path} - result is {adversarial}")
 
