@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--true_label", type=int, help="Number of the correct label")
     parser.add_argument("--save_directory", type=str, help="Where to store the .npy files with the results")
     args = parser.parse_args()
-
+    os.makedirs(args.save_directory, exist_ok=True)
     if args.attack == "face_ver":
         model = get_model(args.model_name)
         img1_dir = args.image1_dir
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             "x2": x2,
             "eps": args.s**2,
             "n_queries": args.queries,
-            "save_directory": args.save_directory + ".npy",
+            "save_directory": args.save_directory,
             "c": x1.shape[2],
             "h": x1.shape[0],
             "w": x1.shape[1],

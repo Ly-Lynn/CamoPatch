@@ -153,16 +153,15 @@ class FaceVerification:
         return y, sims, 1-sims
 
     def __call__(self, img1, img2):
-        y, sims, not_sims = self.get_pred(img1, img2)
-        is_adversarial = True if y != self.true else False
-        # label la 1 => not_sims > sims
-        # label la 0 => sims > not_sims
-        if self.true == 0:
-            f_true = sims
-            f_other = not_sims
+        sims  = self.get_pred(img1, img2)
+        # is_adversarial = True if y != self.true else False
+        
+        if isinstance(sims, torch.Tensor):
+            adv_scores = (1 - self.true) * (0.5 - sims) + self.true * (sims - 0.5)
+            adv_scores = float(adv_scores.cpu().item())
         else:
-            f_true = not_sims
-            f_other = sims
-
-        return [is_adversarial, float(f_true - f_other)]
+            adv_scores = (1 - self.true) * (0.5 - sims) + self.true * (sims - 0.5)
+        is_adversarial = True if adv_scores > 0 else False
+        # print(adv_scores, is_adversarial, sep='\n')
+        return [is_adversarial, adv_scores]
 

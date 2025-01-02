@@ -120,19 +120,18 @@ class Attack:
             "loc": loc,
             "patch": patch,
             "patch_width": int(math.ceil(self.params["eps"] ** .5)),
-            "final_prediction": loss_function.get_label(x_adv) if self.type_attack == "imagenet" else loss_function.get_pred(x_adv, self.params["x2"])[0],
+            "final_prediction": loss_function.get_label(x_adv) if self.type_attack == "imagenet" else loss_function(x_adv, self.params["x2"])[0],
             "process": self.process
         }
 
         save_path = self.params["save_directory"]
-        save_path = save_path.rsplit('.npy', 1)[0]
 
         # Convert data to a serializable format if needed
         serializable_data = self.convert_to_serializable(data)
 
         # Save data in pickle format
-        with open(f"{save_path}{adversarial}.pkl", 'wb') as pickle_file:
-            pickle.dump(serializable_data, pickle_file)
+        with open(f"{save_path}{adversarial}.json", 'w') as pickle_file:
+            json.dump(serializable_data, pickle_file)
         
         print(f"Result pickle saved to {save_path}")
         self.save_image(np.array(data['orig']), f"{save_path}orig.png")
@@ -199,7 +198,7 @@ class Attack:
                         x_adv = x_adv_new
                         l2_curr = l2_new
                 else:
-                    if loss_new < loss:
+                    if loss_new > loss:
                         loss = loss_new
                         adversarial = adversarial_new
                         patch = patch_new
@@ -237,7 +236,7 @@ class Attack:
                     curr_temp = self.params["temp"] / (it + 1)
                     metropolis = math.exp(-diff / curr_temp)
 
-                    if loss_new < loss or np.random.rand() < metropolis:
+                    if loss_new > loss or np.random.rand() < metropolis:
                         loss = loss_new
                         adversarial = adversarial_new
                         loc = loc_new

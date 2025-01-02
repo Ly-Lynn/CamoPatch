@@ -25,5 +25,5 @@ mkdir -p /CamoPatch/outputs
 ```
 5. Run!
 ```bash
-python ConCamoPatch.py --model_name  restnet_vggface --queries 200000 --image1_dir <image_1 directory> --image2_dir <image_1 directory> --true_label 0 --save_directory outputs
+python ConCamoPatch.py --model_name  restnet_vggface --queries 200000 --image1_dir D:\codePJ\RESEARCH\GECCO2025\lfw_dataset\lfw_crop_margin_5\lfw_crop_margin_5\Aaron_Peirsol\Aaron_Peirsol_0001.jpg --image2_dir D:\codePJ\RESEARCH\GECCO2025\lfw_dataset\lfw_crop_margin_5\lfw_crop_margin_5\Aaron_Peirsol\Aaron_Peirsol_0002.jpg --true_label 0 --save_directory outputs
 ```
