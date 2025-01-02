@@ -130,13 +130,13 @@ class Attack:
         serializable_data = self.convert_to_serializable(data)
 
         # Save data in pickle format
-        with open(f"{save_path}{adversarial}.json", 'w') as pickle_file:
-            json.dump(serializable_data, pickle_file)
+        with open(os.path.join(save_path, f"res.json"), 'w') as pickle_file:
+            json.dump(serializable_data, pickle_file, indent=4)
         
         print(f"Result pickle saved to {save_path}")
-        self.save_image(np.array(data['orig']), f"{save_path}orig.png")
+        self.save_image(np.array(data['orig']), os.path.join(save_path, "orig.png"))
 
-        self.save_image(np.array(data['adversary']), f"{save_path}{adversarial}.png")
+        self.save_image(np.array(data['adversary']), os.path.join(save_path, f"{adversarial}.png"))
         print(f"Result adversary saved to {save_path} - result is {adversarial}")
 
     

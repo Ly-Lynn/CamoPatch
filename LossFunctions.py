@@ -150,7 +150,7 @@ class FaceVerification:
         sims = calculate_similarity(preds1, preds2)
         y = get_predict(sims)
     
-        return y, sims, 1-sims
+        return sims
 
     def __call__(self, img1, img2):
         sims  = self.get_pred(img1, img2)
