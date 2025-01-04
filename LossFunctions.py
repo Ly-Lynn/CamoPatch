@@ -163,5 +163,5 @@ class FaceVerification:
             adv_scores = (1 - self.true) * (0.5 - sims) + self.true * (sims - 0.5)
         is_adversarial = True if adv_scores > 0 else False
         # print(adv_scores, is_adversarial, sep='\n')
-        return [is_adversarial, adv_scores]
+        return [is_adversarial, -adv_scores]
 

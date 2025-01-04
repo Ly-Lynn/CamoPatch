@@ -198,7 +198,7 @@ class Attack:
                         x_adv = x_adv_new
                         l2_curr = l2_new
                 else:
-                    if loss_new > loss:
+                    if loss_new < loss:
                         loss = loss_new
                         adversarial = adversarial_new
                         patch = patch_new
@@ -236,7 +236,7 @@ class Attack:
                     curr_temp = self.params["temp"] / (it + 1)
                     metropolis = math.exp(-diff / curr_temp)
 
-                    if loss_new > loss or np.random.rand() < metropolis:
+                    if loss_new < loss or np.random.rand() < metropolis:
                         loss = loss_new
                         adversarial = adversarial_new
                         loc = loc_new
