@@ -111,6 +111,12 @@ class Attack:
             return data 
 
     def completion_procedure(self, adversarial, x_adv, queries, loc, patch, loss_function):
+        last_label, last_loss = None
+        if self.type_attack == 'imagenet':
+            last_label = loss_function.get_label(x_adv)
+        else:
+            last_label, last_loss = loss_function(x_adv, self.params["x2"])[0], loss_function(x_adv, self.params["x2"])[1]
+
         data = {
             "orig": self.params["x"] if self.type_attack == "imagenet" else self.params["x1"],
             "second": self.params["x2"] if self.type_attack == "face" else None,
@@ -120,7 +126,8 @@ class Attack:
             "loc": loc,
             "patch": patch,
             "patch_width": int(math.ceil(self.params["eps"] ** .5)),
-            "final_prediction": loss_function.get_label(x_adv) if self.type_attack == "imagenet" else loss_function(x_adv, self.params["x2"])[0],
+            "final_prediction": last_label,
+            "final_loss": last_loss,
             "process": self.process
         }
 
@@ -151,7 +158,7 @@ class Attack:
         patch_geno = np.random.rand(self.params["N"], 7)
         patch = render(patch_geno, s)
         loc = np.random.randint(h - s, size=2)
-        
+
         update_loc_period = self.params["update_loc_period"]
 
         x_adv = x.copy()
