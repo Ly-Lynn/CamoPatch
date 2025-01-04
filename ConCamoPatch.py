@@ -19,7 +19,7 @@ from CamoPatch import Attack
 if __name__ == "__main__":
 
     load_image = transforms.Compose([
-        transforms.Resize((224,224)),
+        transforms.Resize((160,160)),
         # transforms.CenterCrop(224),
         transforms.ToTensor()
     ])
