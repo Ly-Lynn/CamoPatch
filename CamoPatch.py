@@ -111,7 +111,7 @@ class Attack:
             return data 
 
     def completion_procedure(self, adversarial, x_adv, queries, loc, patch, loss_function):
-        last_label, last_loss = None
+        last_label, last_loss = None, None
         if self.type_attack == 'imagenet':
             last_label = loss_function.get_label(x_adv)
         else:
